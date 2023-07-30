@@ -1,7 +1,9 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import time
 
 
 class State:
@@ -16,7 +18,6 @@ class State:
 
 
 class YandexMapsInterface:
-    ENTER = '\uE006'
     TIMEOUT = 10
 
     @classmethod
@@ -26,6 +27,14 @@ class YandexMapsInterface:
     @classmethod
     def find_elements(cls, where, params):
         return WebDriverWait(where, timeout=cls.TIMEOUT).until(EC.presence_of_all_elements_located(params))
+
+    @staticmethod
+    def minutes_from_text(text):
+        text = text.split()
+        if len(text) == 4:
+            return int(text[0]) * 60 + int(text[3])
+        else:
+            return int(text[0])
 
     def __init__(self):
         self.driver = webdriver.Chrome()
@@ -44,19 +53,32 @@ class YandexMapsInterface:
         self.duration_state = State()
 
     def set_route_from(self, street_name_from):
-        self.route_from.send_keys(street_name_from + self.ENTER)
+        self.route_from.send_keys(Keys.COMMAND, "a")
+        self.route_from.send_keys(Keys.DELETE)
+        self.route_from.send_keys(street_name_from + Keys.ENTER)
 
     def set_route_to(self, street_name_to):
-        self.route_to.send_keys(street_name_to + self.ENTER)
+        self.route_to.send_keys(Keys.COMMAND, "a")
+        self.route_to.send_keys(Keys.DELETE)
+        self.route_to.send_keys(street_name_to + Keys.ENTER)
 
     def get_duration(self):
         WebDriverWait(self.route_panel, timeout=self.TIMEOUT).until(lambda where: self.duration_state.did_change(
             where.find_element(By.CLASS_NAME, 'route-snippet-view').get_attribute('innerHTML')))
-        print(self.duration_state.text)
+        # print(self.duration_state.text)
+        duration_element = self.find_element(
+            self.route_panel, (By.CLASS_NAME, 'masstransit-route-snippet-view__route-duration'))
+
+        return self.minutes_from_text(duration_element.text)
+
 
 ymi = YandexMapsInterface()
 
 ymi.set_route_from('Покровский бульвар, 11с10')
 ymi.set_route_to('Кременчугская, 11')
-ymi.get_duration()
+print(ymi.get_duration())
+
+ymi.set_route_to('Кременчугская, 46')
+print(ymi.get_duration())
+
 input()
