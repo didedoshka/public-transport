@@ -3,7 +3,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import time
+import datetime
+import os
+import csv
 
 
 class State:
@@ -32,7 +34,7 @@ class YandexMapsInterface:
     def minutes_from_text(text):
         text = text.split()
         if len(text) == 4:
-            return int(text[0]) * 60 + int(text[3])
+            return int(text[0]) * 60 + int(text[2])
         else:
             return int(text[0])
 
@@ -72,13 +74,38 @@ class YandexMapsInterface:
         return self.minutes_from_text(duration_element.text)
 
 
-ymi = YandexMapsInterface()
+if __name__ == "__main__":
+    folder_name = str(datetime.datetime.now().replace(microsecond=0))
+    os.mkdir(folder_name)
 
-ymi.set_route_from('Покровский бульвар, 11с10')
-ymi.set_route_to('Кременчугская, 11')
-print(ymi.get_duration())
+    destinations = ['Покровский бульвар, 11с10', 'улица Усачёва, 6']
 
-ymi.set_route_to('Кременчугская, 46')
-print(ymi.get_duration())
+    ymi = YandexMapsInterface()
 
-input()
+    def from_every_address_to_a_given(given_address, addresses, result):
+        ymi.set_route_to(given_address)
+        for address in addresses:
+            ymi.set_route_from(address)
+            result[address][given_address] = ymi.get_duration()
+            ymi.driver.save_screenshot(f'{folder_name}/{address} {given_address}.png')
+
+    with open('list.txt', 'r') as input_list:
+        result = {}
+        addresses = list(map(str.rstrip, input_list.readlines()))
+        for address in addresses:
+            result[address] = {}
+
+        for destination in destinations:
+            from_every_address_to_a_given(destination, addresses, result)
+
+        output = []
+        for address in addresses:
+            output.append(result[address])
+            output[-1]['Адрес'] = address
+
+
+        with open(f'{folder_name}/result.csv', 'w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=['Адрес'] + destinations)
+
+            writer.writeheader()
+            writer.writerows(output)
