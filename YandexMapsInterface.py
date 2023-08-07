@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import datetime
 import os
 import csv
+import time
 
 
 class State:
@@ -58,6 +59,7 @@ class YandexMapsInterface:
         self.route_from.send_keys(Keys.COMMAND, "a")
         self.route_from.send_keys(Keys.DELETE)
         self.route_from.send_keys(street_name_from + Keys.ENTER)
+        time.sleep(7)
 
     def set_route_to(self, street_name_to):
         self.route_to.send_keys(Keys.COMMAND, "a")
