@@ -41,7 +41,6 @@ class YandexMapsInterface:
 
     def __init__(self):
         self.driver = webdriver.Chrome()
-        self.wait = WebDriverWait(self.driver, timeout=3)
         self.driver.get('https://www.yandex.ru/maps')
 
         self.find_element(self.driver, (By.CLASS_NAME, 'route-control')).click()  # enter routes mode
