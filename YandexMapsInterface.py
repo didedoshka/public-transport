@@ -59,7 +59,6 @@ class YandexMapsInterface:
         self.route_from.send_keys(Keys.COMMAND, "a")
         self.route_from.send_keys(Keys.DELETE)
         self.route_from.send_keys(street_name_from + Keys.ENTER)
-        time.sleep(7)
 
     def set_route_to(self, street_name_to):
         self.route_to.send_keys(Keys.COMMAND, "a")
@@ -69,45 +68,21 @@ class YandexMapsInterface:
     def get_duration(self):
         WebDriverWait(self.route_panel, timeout=self.TIMEOUT).until(lambda where: self.duration_state.did_change(
             where.find_element(By.CLASS_NAME, 'route-snippet-view').get_attribute('innerHTML')))
-        # print(self.duration_state.text)
         duration_element = self.find_element(
             self.route_panel, (By.CLASS_NAME, 'masstransit-route-snippet-view__route-duration'))
 
         return self.minutes_from_text(duration_element.text)
 
 
-if __name__ == "__main__":
-    folder_name = str(datetime.datetime.now().replace(microsecond=0))
-    os.mkdir(folder_name)
-
-    destinations = ['Покровский бульвар, 11с10', 'улица Усачёва, 6']
-
-    ymi = YandexMapsInterface()
-
-    def from_every_address_to_a_given(given_address, addresses, result):
-        ymi.set_route_to(given_address)
-        for address in addresses:
-            ymi.set_route_from(address)
-            result[address][given_address] = ymi.get_duration()
-            ymi.driver.save_screenshot(f'{folder_name}/{address} {given_address}.png')
-
-    with open('list.txt', 'r') as input_list:
-        result = {}
-        addresses = list(map(str.rstrip, input_list.readlines()))
-        for address in addresses:
-            result[address] = {}
-
-        for destination in destinations:
-            from_every_address_to_a_given(destination, addresses, result)
-
-        output = []
-        for address in addresses:
-            output.append(result[address])
-            output[-1]['Адрес'] = address
+def from_every_address_to_a_given(ymi, given_address, addresses, result, screenshot_destination=None):
+    ymi.set_route_to(given_address)
+    for address in addresses:
+        ymi.set_route_from(address)
+        result[address][given_address] = ymi.get_duration()
+        if screenshot_destination is not None:
+            ymi.driver.save_screenshot(f'{screenshot_destination}/{address} {given_address}.png')
 
 
-        with open(f'{folder_name}/result.csv', 'w', newline='') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=['Адрес'] + destinations)
-
-            writer.writeheader()
-            writer.writerows(output)
+def from_every_address_to_every_destination(ymi, addresses, destinations, result, screenshot_destination=None):
+    for destination in destinations:
+        from_every_address_to_a_given(ymi, destination, addresses, result, screenshot_destination)
