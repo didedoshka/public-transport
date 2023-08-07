@@ -95,9 +95,18 @@ class YandexMapsInterface:
         self.route_to.send_keys(street_name_to + Keys.ENTER)
 
     def get_duration(self):
-        self.find_route_panel()
-        WebDriverWait(self.route_panel, timeout=self.TIMEOUT).until(lambda where: self.duration_state.did_change(
-            where.find_element(By.CLASS_NAME, 'route-snippet-view').get_attribute('innerHTML')))
+        tries = 5
+        while tries > 0:
+            try:
+                self.find_route_panel()
+                WebDriverWait(self.route_panel, timeout=2).until(lambda where: self.duration_state.did_change(
+                where.find_element(By.CLASS_NAME, 'route-snippet-view').get_attribute('innerHTML')))
+                break
+            finally:
+                tries -= 1
+
+        print(tries, flush=True)
+
         duration_element = self.find_element(
             self.route_panel, (By.CLASS_NAME, 'masstransit-route-snippet-view__route-duration'))
 
