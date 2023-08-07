@@ -38,6 +38,8 @@ class YandexMapsInterface:
         if len(text) == 4:
             return int(text[0]) * 60 + int(text[2])
         else:
+            if text[1] == 'ч':
+                return int(text[0]) * 60
             return int(text[0])
 
     def __init__(self):
