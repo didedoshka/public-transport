@@ -45,21 +45,33 @@ class YandexMapsInterface:
 
         self.find_element(self.driver, (By.CLASS_NAME, 'route-control')).click()  # enter routes mode
 
-        self.route_panel = self.find_element(self.driver, (By.CLASS_NAME, 'route-panel-form-view__content'))
+        self.route_panel = None
+        self.find_route_panel()
+
         self.find_element(self.route_panel, (By.CLASS_NAME, '_mode_masstransit')).click()  # select public transport
 
+        self.duration_state = State()
+        self.route_from = None
+        self.route_to = None
+        self.find_from_and_to_inputs()
+
+    def find_route_panel(self):
+        self.route_panel = self.find_element(self.driver, (By.CLASS_NAME, 'route-panel-form-view__content'))
+
+    def find_from_and_to_inputs(self):
+        self.find_route_panel()
         inputs_in_route_panel = self.find_elements(self.route_panel, (By.TAG_NAME, 'input'))
         self.route_from = inputs_in_route_panel[0]
         self.route_to = inputs_in_route_panel[1]
 
-        self.duration_state = State()
-
     def set_route_from(self, street_name_from):
+        self.find_from_and_to_inputs()
         self.route_from.send_keys(Keys.COMMAND, "a")
         self.route_from.send_keys(Keys.DELETE)
         self.route_from.send_keys(street_name_from + Keys.ENTER)
 
     def set_route_to(self, street_name_to):
+        self.find_from_and_to_inputs()
         self.route_to.send_keys(Keys.COMMAND, "a")
         self.route_to.send_keys(Keys.DELETE)
         self.route_to.send_keys(street_name_to + Keys.ENTER)
