@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver import ChromeOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
@@ -42,8 +43,11 @@ class YandexMapsInterface:
                 return int(text[0]) * 60
             return int(text[0])
 
-    def __init__(self):
-        self.driver = webdriver.Chrome()
+    def __init__(self, headless=True):
+        options = ChromeOptions()
+        if headless:
+            options.add_argument('--headless=new')
+        self.driver = webdriver.Chrome(options=options)
         self.driver.get('https://www.yandex.ru/maps')
 
         self.find_element(self.driver, (By.CLASS_NAME, 'route-control')).click()  # enter routes mode
@@ -77,20 +81,20 @@ class YandexMapsInterface:
         self.settings_element.click()
         self.find_route_panel()
         self.input_for_time = self.find_element(self.route_panel, (By.CSS_SELECTOR, '[placeholder="00:00"]'))
-        self.input_for_time.send_keys(Keys.COMMAND, "a")
+        self.input_for_time.send_keys(Keys.COMMAND, 'a')
         self.input_for_time.send_keys(Keys.DELETE)
         self.input_for_time.send_keys(self.TIME_OF_DEPARTURE + Keys.ENTER)
         self.is_time_set = True
 
     def set_route_from(self, street_name_from):
         self.find_from_and_to_inputs()
-        self.route_from.send_keys(Keys.COMMAND, "a")
+        self.route_from.send_keys(Keys.COMMAND, 'a')
         self.route_from.send_keys(Keys.DELETE)
         self.route_from.send_keys(street_name_from + Keys.ENTER)
 
     def set_route_to(self, street_name_to):
         self.find_from_and_to_inputs()
-        self.route_to.send_keys(Keys.COMMAND, "a")
+        self.route_to.send_keys(Keys.COMMAND, 'a')
         self.route_to.send_keys(Keys.DELETE)
         self.route_to.send_keys(street_name_to + Keys.ENTER)
 
@@ -99,15 +103,18 @@ class YandexMapsInterface:
         while tries > 0:
             try:
                 self.find_route_panel()
-                WebDriverWait(self.route_panel, timeout=2).until(lambda where: self.duration_state.did_change(
+                WebDriverWait(self.route_panel, timeout=3).until(lambda where: self.duration_state.did_change(
                 where.find_element(By.CLASS_NAME, 'route-snippet-view').get_attribute('innerHTML')))
                 break
-            except:
+            except Exception as exc:
+                self.driver.save_screenshot(f'{datetime.datetime.now().strftime("%H-%M-%S")}. Retry {5 - tries}.png')
                 print(f'retrying... Tries left: {tries}')
+                time.sleep(2)
                 tries -= 1
 
-        if tries == 0:
-            raise Exception("Couldn't find duration even after 5 retries")
+                if tries == 0:
+                    print('Couldn\'t find duration even after 5 retries. Last exception is: {exc}')
+                    return 0
         duration_element = self.find_element(
             self.route_panel, (By.CLASS_NAME, 'masstransit-route-snippet-view__route-duration'))
 
