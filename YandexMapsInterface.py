@@ -102,7 +102,8 @@ class YandexMapsInterface:
                 WebDriverWait(self.route_panel, timeout=2).until(lambda where: self.duration_state.did_change(
                 where.find_element(By.CLASS_NAME, 'route-snippet-view').get_attribute('innerHTML')))
                 break
-            finally:
+            except:
+                print(f'retrying... Tries left: {tries}')
                 tries -= 1
 
         if tries == 0:
