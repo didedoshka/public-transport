@@ -107,7 +107,7 @@ class YandexMapsInterface:
                 where.find_element(By.CLASS_NAME, 'route-snippet-view').get_attribute('innerHTML')))
                 break
             except Exception as exc:
-                self.driver.save_screenshot(f'{datetime.datetime.now().strftime("%H-%M-%S")}. Retry {5 - tries}.png')
+                # self.driver.save_screenshot(f'{datetime.datetime.now().strftime("%H-%M-%S")}. Retry {5 - tries}.png')
                 print(f'retrying... Tries left: {tries}')
                 time.sleep(2)
                 tries -= 1
@@ -127,8 +127,8 @@ def from_every_address_to_a_given(ymi, given_address, addresses, result, screens
         ymi.set_route_from(address)
         ymi.set_time()
         result[address][given_address] = ymi.get_duration()
-        if screenshot_destination is not None:
-            ymi.driver.save_screenshot(f'{screenshot_destination}/{address} {given_address}.png')
+        # if screenshot_destination is not None:
+        #     ymi.driver.save_screenshot(f'{screenshot_destination}/{address} {given_address}.png')
 
 
 def from_every_address_to_every_destination(ymi, addresses, destinations, result, screenshot_destination=None):
