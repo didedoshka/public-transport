@@ -1,1 +1,2 @@
 selenium>=4.10.0
+cianparser @ https://github.com/didedoshka/cianparser/archive/master.zip
