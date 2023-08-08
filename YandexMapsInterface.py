@@ -75,14 +75,12 @@ class YandexMapsInterface:
         self.find_route_panel()
         self.settings_element = self.find_element(self.route_panel, (By.CLASS_NAME, 'route-list-view__settings'))
         self.settings_element.click()
-        # print('settings clicked')
         self.find_route_panel()
         self.input_for_time = self.find_element(self.route_panel, (By.CSS_SELECTOR, '[placeholder="00:00"]'))
         self.input_for_time.send_keys(Keys.COMMAND, "a")
         self.input_for_time.send_keys(Keys.DELETE)
         self.input_for_time.send_keys(self.TIME_OF_DEPARTURE + Keys.ENTER)
         self.is_time_set = True
-        # print('time set')
 
     def set_route_from(self, street_name_from):
         self.find_from_and_to_inputs()
@@ -107,8 +105,8 @@ class YandexMapsInterface:
             finally:
                 tries -= 1
 
-        print(tries, flush=True)
-
+        if tries == 0:
+            raise Exception("Couldn't find duration even after 5 retries")
         duration_element = self.find_element(
             self.route_panel, (By.CLASS_NAME, 'masstransit-route-snippet-view__route-duration'))
 
