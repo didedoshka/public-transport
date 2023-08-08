@@ -8,7 +8,7 @@ import datetime
 import os
 import csv
 import time
-
+from tqdm import tqdm
 
 class State:
     def __init__(self):
@@ -113,7 +113,7 @@ class YandexMapsInterface:
                 tries -= 1
 
                 if tries == 0:
-                    print('Couldn\'t find duration even after 5 retries. Last exception is: {exc}')
+                    print(f'Couldn\'t find duration even after 5 retries. Last exception is: {exc}')
                     return 0
         duration_element = self.find_element(
             self.route_panel, (By.CLASS_NAME, 'masstransit-route-snippet-view__route-duration'))
@@ -123,7 +123,7 @@ class YandexMapsInterface:
 
 def from_every_address_to_a_given(ymi, given_address, addresses, result, screenshot_destination=None):
     ymi.set_route_to(given_address)
-    for address in addresses:
+    for address in tqdm(addresses):
         ymi.set_route_from(address)
         ymi.set_time()
         result[address][given_address] = ymi.get_duration()
@@ -132,5 +132,5 @@ def from_every_address_to_a_given(ymi, given_address, addresses, result, screens
 
 
 def from_every_address_to_every_destination(ymi, addresses, destinations, result, screenshot_destination=None):
-    for destination in destinations:
+    for destination in tqdm(destinations):
         from_every_address_to_a_given(ymi, destination, addresses, result, screenshot_destination)
