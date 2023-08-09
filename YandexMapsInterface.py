@@ -4,11 +4,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import datetime
-import os
-import csv
 import time
 from tqdm import tqdm
+import builtins
 
 class State:
     def __init__(self):
@@ -44,6 +42,7 @@ class YandexMapsInterface:
             return int(text[0])
 
     def __init__(self, headless=True):
+        builtins.print = tqdm.write
         options = ChromeOptions()
         if headless:
             options.add_argument('--headless=new')
