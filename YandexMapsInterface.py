@@ -102,7 +102,7 @@ class YandexMapsInterface:
         while tries > 0:
             try:
                 self.find_route_panel()
-                WebDriverWait(self.route_panel, timeout=3).until(lambda where: self.duration_state.did_change(
+                WebDriverWait(self.route_panel, timeout=8).until(lambda where: self.duration_state.did_change(
                 where.find_element(By.CLASS_NAME, 'route-snippet-view').get_attribute('innerHTML')))
                 break
             except Exception as exc:
@@ -122,10 +122,11 @@ class YandexMapsInterface:
 
 def from_every_address_to_a_given(ymi, given_address, addresses, result, screenshot_destination=None):
     ymi.set_route_to(given_address)
-    for address in tqdm(addresses):
+    for i in tqdm(range(len(addresses))):
+        address = addresses[i]
         ymi.set_route_from(address)
         ymi.set_time()
-        result[address][given_address] = ymi.get_duration()
+        result[i][given_address] = ymi.get_duration()
         # if screenshot_destination is not None:
         #     ymi.driver.save_screenshot(f'{screenshot_destination}/{address} {given_address}.png')
 
